@@ -6,6 +6,6 @@
         public string Name { get; set; }
         public string Email { get; set; }
         public string Role { get; set; } // Admin, Manager, Employee
-        public string PasswordHash { get; set; } // Password hashed for security
+        public string PasswordHash { get; set; }
     }
 }

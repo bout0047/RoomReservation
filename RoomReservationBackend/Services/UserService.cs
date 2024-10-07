@@ -26,7 +26,7 @@ namespace RoomReservationBackend.Services
                 Name = userDto.Name,
                 Email = userDto.Email,
                 Role = userDto.Role,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password)
+                PasswordHash = BCrypt.HashPassword(userDto.Password)
             };
             await _userRepository.CreateUserAsync(user);
             return user;
@@ -35,7 +35,7 @@ namespace RoomReservationBackend.Services
         public async Task<User> AuthenticateUserAsync(string email, string password)
         {
             var user = await _userRepository.GetUserByEmailAsync(email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            if (user == null || !BCrypt.Verify(password, user.PasswordHash))
             {
                 return null; // Invalid credentials
             }

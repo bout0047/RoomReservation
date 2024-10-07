@@ -1,29 +1,64 @@
-﻿using RoomReservationBackend.Data;
-using RoomReservationBackend.Utilities;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using RoomReservationBackend.Data;
+using RoomReservationBackend.Models;
 
-public async Task<bool> ApproveReservationAsync(int reservationId)
+namespace RoomReservationBackend.Services
 {
-    var reservation = await _reservationRepository.GetReservationByIdAsync(reservationId);
-    if (reservation == null || reservation.IsApproved)
+    public class RoomService
     {
-        return false; // Reservation not found or already approved
+        private readonly RoomRepository _roomRepository;
+
+        // Constructor to inject the repository
+        public RoomService(RoomRepository roomRepository)
+        {
+            _roomRepository = roomRepository;
+        }
+
+        // Method to get all rooms
+        public async Task<IEnumerable<Room>> GetAllRoomsAsync()
+        {
+            return await _roomRepository.GetAllRoomsAsync();
+        }
+
+        // Method to get a room by ID
+        public async Task<Room> GetRoomByIdAsync(int id)
+        {
+            return await _roomRepository.GetRoomByIdAsync(id);
+        }
+
+        // Method to create a room
+        public async Task CreateRoomAsync(RoomDto roomDto)
+        {
+            var room = new Room
+            {
+                Name = roomDto.Name,
+                Capacity = roomDto.Capacity,
+                Location = roomDto.Location,
+                Amenities = roomDto.Amenities
+            };
+
+            await _roomRepository.CreateRoomAsync(room);
+        }
+
+        // Method to update a room
+        public async Task UpdateRoomAsync(int id, RoomDto roomDto)
+        {
+            var room = await _roomRepository.GetRoomByIdAsync(id);
+            if (room != null)
+            {
+                room.Name = roomDto.Name;
+                room.Capacity = roomDto.Capacity;
+                room.Location = roomDto.Location;
+                room.Amenities = roomDto.Amenities;
+                await _roomRepository.UpdateRoomAsync(room);
+            }
+        }
+
+        // Method to delete a room
+        public async Task DeleteRoomAsync(int id)
+        {
+            await _roomRepository.DeleteRoomAsync(id);
+        }
     }
-
-    reservation.IsApproved = true;
-    await _reservationRepository.UpdateReservationAsync(reservation);
-    await _emailService.SendEmailAsync(reservation.User.Email, "Reservation Approved", $"Your reservation for Room {reservation.RoomId} has been approved.");
-    return true;
-}
-
-public async Task<bool> RejectReservationAsync(int reservationId)
-{
-    var reservation = await _reservationRepository.GetReservationByIdAsync(reservationId);
-    if (reservation == null || !reservation.IsApproved)
-    {
-        return false; // Reservation not found or already rejected
-    }
-
-    await _reservationRepository.DeleteReservationAsync(reservationId);
-    await _emailService.SendEmailAsync(reservation.User.Email, "Reservation Rejected", $"Your reservation for Room {reservation.RoomId} has been rejected.");
-    return true;
 }
