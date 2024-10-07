@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoomReservationBackend", "RoomReservationBackend\RoomReservationBackend.csproj", "{4983ADAB-DA5D-4231-8C88-FB9C4D773B28}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4983ADAB-DA5D-4231-8C88-FB9C4D773B28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4983ADAB-DA5D-4231-8C88-FB9C4D773B28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4983ADAB-DA5D-4231-8C88-FB9C4D773B28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4983ADAB-DA5D-4231-8C88-FB9C4D773B28}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BBE04974-FE97-42A0-8A16-441BA0640879}
+	EndGlobalSection
+EndGlobal
