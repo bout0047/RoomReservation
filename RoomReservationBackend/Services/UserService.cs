@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using RoomReservationBackend.Data;
+﻿using RoomReservationBackend.DTOs;
 using RoomReservationBackend.Models;
-using BCrypt.Net;
+using RoomReservationBackend.Repositories;
+using System.Threading.Tasks;
 
 namespace RoomReservationBackend.Services
 {
@@ -14,32 +14,31 @@ namespace RoomReservationBackend.Services
             _userRepository = userRepository;
         }
 
-        public async Task<User> RegisterUserAsync(UserDto userDto)
+        public async Task<string> RegisterUserAsync(UserRegistrationDto registrationDto)
         {
-            if (await _userRepository.GetUserByEmailAsync(userDto.Email) != null)
+            // Check if the user already exists
+            var existingUser = await _userRepository.GetUserByEmailAsync(registrationDto.Email);
+            if (existingUser != null)
             {
-                return null; // User already exists
+                throw new Exception("User already exists.");
             }
 
+            // Create a new User entity
             var user = new User
             {
-                Name = userDto.Name,
-                Email = userDto.Email,
-                Role = userDto.Role,
-                PasswordHash = BCrypt.HashPassword(userDto.Password)
+                Name = registrationDto.Name,
+                Email = registrationDto.Email,
+                PasswordHash = HashPassword(registrationDto.Password) // Implement this method to hash the password
             };
-            await _userRepository.CreateUserAsync(user);
-            return user;
+
+            await _userRepository.AddUserAsync(user); // Add user to the repository
+            return "User registered successfully.";
         }
 
-        public async Task<User> AuthenticateUserAsync(string email, string password)
+        private string HashPassword(string password)
         {
-            var user = await _userRepository.GetUserByEmailAsync(email);
-            if (user == null || !BCrypt.Verify(password, user.PasswordHash))
-            {
-                return null; // Invalid credentials
-            }
-            return user;
+            // Implement your password hashing logic here
+            return password; // Replace with actual hashing
         }
     }
 }

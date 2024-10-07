@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RoomReservationBackend.Models;
+using RoomReservationBackend.DTOs;
 using RoomReservationBackend.Services;
-using RoomReservationBackend.Utilities;
-using System.Threading.Tasks;
 
 namespace RoomReservationBackend.Controllers
 {
@@ -11,36 +9,30 @@ namespace RoomReservationBackend.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
-        private readonly JwtAuthenticationManager _jwtAuthenticationManager;
 
-        public UsersController(UserService userService, JwtAuthenticationManager jwtAuthenticationManager)
+        public UsersController(UserService userService)
         {
             _userService = userService;
-            _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserDto userDto)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationDto registrationDto)
         {
-            var user = await _userService.RegisterUserAsync(userDto);
-            if (user == null)
+            if (registrationDto == null || !ModelState.IsValid)
             {
-                return BadRequest("User already exists");
-            }
-            return Ok(user);
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto userDto)
-        {
-            var user = await _userService.AuthenticateUserAsync(userDto.Email, userDto.Password);
-            if (user == null)
-            {
-                return Unauthorized();
+                return BadRequest(ModelState);
             }
 
-            var token = _jwtAuthenticationManager.Authenticate(user.Email, user.Role);
-            return Ok(new { Token = token });
+            try
+            {
+                var result = await _userService.RegisterUserAsync(registrationDto);
+                return Ok(result); // Return the registration result (e.g., user info, token)
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional)
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
         }
     }
 }

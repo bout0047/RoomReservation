@@ -11,7 +11,7 @@ namespace RoomReservationBackend.Models
         public DateTime EndTime { get; set; }
         public bool IsApproved { get; set; }
 
-        public Room Room { get; set; }
-        public User User { get; set; }
+        public Room Room { get; set; } = new Room();
+        public User User { get; set; } = new User();
     }
 }

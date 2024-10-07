@@ -8,25 +8,30 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// Load configuration settings
+var configuration = builder.Configuration;
 
-// Register the DbContext with SQL Server
+// Add services to the container
 builder.Services.AddDbContext<RoomReservationContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 // Register application services
-builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<UserService>();
-
-// Register repository classes
-builder.Services.AddScoped<RoomRepository>();
-builder.Services.AddScoped<ReservationRepository>();
 builder.Services.AddScoped<UserRepository>();
 
-// Add JWT Authentication
-builder.Services.AddSingleton(new JwtAuthenticationManager("YourSecretKey"));
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
+// Add JWT Authentication
+var jwtSecretKey = "Saidia12!";
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -37,7 +42,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKey")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
         ValidateIssuer = false,
         ValidateAudience = false
     };
@@ -45,8 +50,6 @@ builder.Services.AddAuthentication(options =>
 
 // Register controllers
 builder.Services.AddControllers();
-
-builder.Services.AddSingleton(new EmailService("smtp.example.com", 587, "noreply@example.com", "your_smtp_password"));
 
 // Swagger for API documentation
 builder.Services.AddEndpointsApiExplorer();
@@ -62,6 +65,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins"); // Use the CORS policy
 
 app.UseAuthentication();
 app.UseAuthorization();

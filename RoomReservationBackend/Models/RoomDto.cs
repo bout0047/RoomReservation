@@ -2,9 +2,10 @@
 {
     public class RoomDto
     {
-        public string Name { get; set; }
+        public int RoomId { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int Capacity { get; set; }
-        public string Location { get; set; }
-        public string Amenities { get; set; }
+        public string Location { get; set; } = string.Empty;
+        public string Amenities { get; set; } = string.Empty;
     }
 }
