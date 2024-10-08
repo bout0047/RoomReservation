@@ -9,25 +9,21 @@ namespace RoomReservationBackend.Services
     {
         private readonly RoomRepository _roomRepository;
 
-        // Constructor to inject the repository
         public RoomService(RoomRepository roomRepository)
         {
             _roomRepository = roomRepository;
         }
 
-        // Method to get all rooms
         public async Task<IEnumerable<Room>> GetAllRoomsAsync()
         {
             return await _roomRepository.GetAllRoomsAsync();
         }
 
-        // Method to get a room by ID
         public async Task<Room> GetRoomByIdAsync(int id)
         {
             return await _roomRepository.GetRoomByIdAsync(id);
         }
 
-        // Method to create a room
         public async Task CreateRoomAsync(RoomDto roomDto)
         {
             var room = new Room
@@ -41,7 +37,6 @@ namespace RoomReservationBackend.Services
             await _roomRepository.CreateRoomAsync(room);
         }
 
-        // Method to update a room
         public async Task UpdateRoomAsync(int id, RoomDto roomDto)
         {
             var room = await _roomRepository.GetRoomByIdAsync(id);
@@ -55,7 +50,6 @@ namespace RoomReservationBackend.Services
             }
         }
 
-        // Method to delete a room
         public async Task DeleteRoomAsync(int id)
         {
             await _roomRepository.DeleteRoomAsync(id);

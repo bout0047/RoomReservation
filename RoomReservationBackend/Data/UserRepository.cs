@@ -1,4 +1,5 @@
-﻿using RoomReservationBackend.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using RoomReservationBackend.Data;
 using RoomReservationBackend.Models;
 
 namespace RoomReservationBackend.Repositories
@@ -15,6 +16,17 @@ namespace RoomReservationBackend.Repositories
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users.FindAsync(userId);
+        }
+
+        public async Task CreateUserAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

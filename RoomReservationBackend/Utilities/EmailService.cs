@@ -21,23 +21,22 @@ namespace RoomReservationBackend.Utilities
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            var smtpClient = new SmtpClient(_smtpServer)
+            using (var smtpClient = new SmtpClient(_smtpServer, _smtpPort))
             {
-                Port = _smtpPort,
-                Credentials = new NetworkCredential(_fromEmail, _fromPassword),
-                EnableSsl = true,
-            };
+                smtpClient.Credentials = new NetworkCredential(_fromEmail, _fromPassword);
+                smtpClient.EnableSsl = true;
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_fromEmail),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true,
-            };
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(_fromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true,
+                };
 
-            mailMessage.To.Add(toEmail);
-            await smtpClient.SendMailAsync(mailMessage);
+                mailMessage.To.Add(toEmail);
+                await smtpClient.SendMailAsync(mailMessage);
+            }
         }
     }
 }

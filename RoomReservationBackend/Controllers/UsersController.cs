@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RoomReservationBackend.DTOs;
+using RoomReservationBackend.Models;
 using RoomReservationBackend.Services;
+using RoomReservationBackend.Utilities;
 
 namespace RoomReservationBackend.Controllers
 {
@@ -9,30 +11,52 @@ namespace RoomReservationBackend.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly JwtAuthenticationManager _jwtAuthenticationManager;
 
-        public UsersController(UserService userService)
+        public UsersController(UserService userService, JwtAuthenticationManager jwtAuthenticationManager)
         {
             _userService = userService;
+            _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDto registrationDto)
+        public async Task<IActionResult> RegisterUser(UserRegistrationDto userDto)
         {
-            if (registrationDto == null || !ModelState.IsValid)
+            var user = new User
             {
-                return BadRequest(ModelState);
+                Name = userDto.Name,
+                Email = userDto.Email,
+                PasswordHash = userDto.Password // This is hashed in UserService
+            };
+
+            var result = await _userService.RegisterUserAsync(user);
+
+            if (!result)
+            {
+                return BadRequest("User already exists or registration failed.");
             }
 
-            try
+            // Generate a token after successful registration
+            var token = _jwtAuthenticationManager.Authenticate(user.Email, "User");
+            if (token == null)
             {
-                var result = await _userService.RegisterUserAsync(registrationDto);
-                return Ok(result); // Return the registration result (e.g., user info, token)
+                return StatusCode(500, "Error generating token");
             }
-            catch (Exception ex)
+
+            return Ok(new { token, message = "User registered successfully", redirectUrl = "/" });
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserDto userDto)
+        {
+            var user = await _userService.AuthenticateUserAsync(userDto.Email, userDto.Password);
+            if (user == null)
             {
-                // Log the exception (optional)
-                return StatusCode(500, "Internal server error: " + ex.Message);
+                return Unauthorized("Invalid credentials.");
             }
+
+            var token = _jwtAuthenticationManager.Authenticate(user.Email, "User");
+            return Ok(new { token, redirectUrl = "/" });
         }
     }
 }

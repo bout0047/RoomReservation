@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
-import 'screens/home_page.dart';
-import 'screens/login_page.dart';
-import 'screens/register_page.dart';
+import 'package:room_reservation_app/providers/auth_provider.dart';
+import 'package:room_reservation_app/screens/login_page.dart';
+import 'package:room_reservation_app/screens/register_page.dart';
+import 'package:room_reservation_app/screens/profile_page.dart';
+import 'package:room_reservation_app/screens/home_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
-      child: MaterialApp(
-        title: 'Room Reservation App',
-        initialRoute: '/',
-        routes: {
-          '/': (context) => HomePage(),
-          '/login': (context) => LoginPage(),
-          '/register': (context) => RegisterPage(),
-        },
-      ),
+    return MaterialApp(
+      title: 'Room Reservation App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
+        '/profile': (context) => ProfilePage(),
+        '/home': (context) => HomePage(),
+      },
     );
   }
 }

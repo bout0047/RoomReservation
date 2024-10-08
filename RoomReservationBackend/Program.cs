@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RoomReservationBackend.Data;
+using RoomReservationBackend.Repositories;
 using RoomReservationBackend.Services;
 using RoomReservationBackend.Utilities;
 using System.Text;
@@ -15,9 +16,21 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<RoomReservationContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-// Register application services
-builder.Services.AddScoped<UserService>();
+// Register application services and repositories
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ReservationRepository>();
+builder.Services.AddScoped<RoomRepository>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ReservationService>();
+builder.Services.AddScoped<EmailService>(sp => new EmailService(
+    configuration["Email:SmtpServer"],
+    int.Parse(configuration["Email:SmtpPort"]),
+    configuration["Email:FromEmail"],
+    configuration["Email:FromPassword"]
+));
+builder.Services.AddSingleton<JwtAuthenticationManager>(sp =>
+    new JwtAuthenticationManager(configuration["Jwt:SecretKey"])
+);
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -31,7 +44,7 @@ builder.Services.AddCors(options =>
 });
 
 // Add JWT Authentication
-var jwtSecretKey = "Saidia12!";
+var jwtSecretKey = configuration["Jwt:SecretKey"];
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

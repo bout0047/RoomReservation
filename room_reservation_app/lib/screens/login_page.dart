@@ -26,14 +26,23 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                await Provider.of<AuthProvider>(context, listen: false).login(
-                  emailController.text,
-                  passwordController.text,
-                );
-                // Navigate to home or wherever you want after login
-                Navigator.pushNamed(context, '/');
+                try {
+                  await Provider.of<AuthProvider>(context, listen: false).login(
+                    emailController.text,
+                    passwordController.text,
+                  );
+                  Navigator.pushReplacementNamed(context, '/profile');
+                } catch (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                }
               },
               child: Text('Login'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/register');
+              },
+              child: Text('Register'),
             ),
           ],
         ),

@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:room_reservation_app/utils/api_constants.dart';
 
 class AuthService {
-  final String baseUrl = 'http://localhost:5278/api/Users'; // Replace with your actual API URL
-
   Future<String> register(String name, String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/register'), // Adjust the endpoint as necessary
+      Uri.parse(ApiConstants.registerEndpoint),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -18,16 +17,20 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      // Assuming the API returns a token
-      return json.decode(response.body)['token'];
+      var body = json.decode(response.body);
+      if (body['token'] != null) {
+        return body['token'];  // Token is returned from the backend
+      } else {
+        throw Exception('Failed to register: token not returned');
+      }
     } else {
-      throw Exception('Failed to register');
+      throw Exception('Failed to register: ${response.body}');
     }
   }
 
   Future<String> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/login'), // Adjust the endpoint as necessary
+      Uri.parse(ApiConstants.loginEndpoint),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -38,10 +41,14 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      // Assuming the API returns a token
-      return json.decode(response.body)['token'];
+      var body = json.decode(response.body);
+      if (body['token'] != null) {
+        return body['token'];  // Token is returned from the backend
+      } else {
+        throw Exception('Failed to login: token not returned');
+      }
     } else {
-      throw Exception('Failed to login');
+      throw Exception('Failed to login: ${response.body}');
     }
   }
 }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RoomReservationBackend.Data;
 using RoomReservationBackend.Models;
+using RoomReservationBackend.Repositories; // Corrected namespace for UserRepository
 using RoomReservationBackend.Utilities;
 
 namespace RoomReservationBackend.Services
@@ -10,7 +11,7 @@ namespace RoomReservationBackend.Services
     {
         private readonly ReservationRepository _reservationRepository;
         private readonly RoomRepository _roomRepository;
-        private readonly UserRepository _userRepository;
+        private readonly UserRepository _userRepository; // Ensure UserRepository is in the correct namespace
         private readonly EmailService _emailService;
 
         public ReservationService(
@@ -28,7 +29,6 @@ namespace RoomReservationBackend.Services
         // Create a new reservation
         public async Task<bool> CreateReservationAsync(ReservationDto reservationDto)
         {
-            // Check if the room is available for the specified time
             bool isAvailable = await IsRoomAvailableAsync(reservationDto.RoomId, reservationDto.StartTime, reservationDto.EndTime);
             if (!isAvailable)
             {
@@ -153,7 +153,6 @@ namespace RoomReservationBackend.Services
                 return false; // Reservation not found
             }
 
-            // Check if the updated timeslot is available
             bool isAvailable = await IsRoomAvailableAsync(reservationDto.RoomId, reservationDto.StartTime, reservationDto.EndTime);
             if (!isAvailable)
             {

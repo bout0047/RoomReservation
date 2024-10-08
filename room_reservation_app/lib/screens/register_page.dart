@@ -10,36 +10,41 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register')),
+      appBar: AppBar(title: const Text('Register')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                await Provider.of<AuthProvider>(context, listen: false).register(
-                  nameController.text,
-                  emailController.text,
-                  passwordController.text,
-                );
-                // Navigate to home or wherever you want after registration
-                Navigator.pushNamed(context, '/');
+                try {
+                  await Provider.of<AuthProvider>(context, listen: false).register(
+                    nameController.text,
+                    emailController.text,
+                    passwordController.text,
+                  );
+                  Navigator.pushReplacementNamed(context, '/profile');
+                } catch (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(error.toString())),
+                  );
+                }
               },
-              child: Text('Register'),
+              child: const Text('Register'),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
-﻿using RoomReservationBackend.DTOs;
+﻿using System.Security.Cryptography;
+using System.Text;
 using RoomReservationBackend.Models;
 using RoomReservationBackend.Repositories;
 using System.Threading.Tasks;
@@ -14,31 +15,55 @@ namespace RoomReservationBackend.Services
             _userRepository = userRepository;
         }
 
-        public async Task<string> RegisterUserAsync(UserRegistrationDto registrationDto)
+        public async Task<bool> RegisterUserAsync(User user)
         {
-            // Check if the user already exists
-            var existingUser = await _userRepository.GetUserByEmailAsync(registrationDto.Email);
+            var existingUser = await _userRepository.GetUserByEmailAsync(user.Email);
             if (existingUser != null)
             {
-                throw new Exception("User already exists.");
+                return false;
             }
 
-            // Create a new User entity
-            var user = new User
-            {
-                Name = registrationDto.Name,
-                Email = registrationDto.Email,
-                PasswordHash = HashPassword(registrationDto.Password) // Implement this method to hash the password
-            };
-
-            await _userRepository.AddUserAsync(user); // Add user to the repository
-            return "User registered successfully.";
+            // Generate salt and hash the password
+            var salt = GenerateSalt();
+            user.PasswordHash = HashPassword(user.PasswordHash, salt);
+            user.Salt = salt; // Assuming User entity has a Salt property
+            await _userRepository.CreateUserAsync(user);
+            return true;
         }
 
-        private string HashPassword(string password)
+        public async Task<User?> AuthenticateUserAsync(string email, string password)
         {
-            // Implement your password hashing logic here
-            return password; // Replace with actual hashing
+            var user = await _userRepository.GetUserByEmailAsync(email);
+            if (user != null && VerifyPassword(password, user.PasswordHash, user.Salt))
+            {
+                return user;
+            }
+            return null;
+        }
+
+        // Helper method to generate a salt
+        private string GenerateSalt()
+        {
+            var saltBytes = new byte[16];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(saltBytes);
+            return Convert.ToBase64String(saltBytes);
+        }
+
+        // Hash the password with the salt
+        private string HashPassword(string password, string salt)
+        {
+            using var sha256 = SHA256.Create();
+            var combined = Encoding.UTF8.GetBytes(password + salt);
+            var hashedBytes = sha256.ComputeHash(combined);
+            return Convert.ToBase64String(hashedBytes);
+        }
+
+        // Verify the password by hashing it with the stored salt
+        private bool VerifyPassword(string inputPassword, string storedHash, string storedSalt)
+        {
+            var hashedInput = HashPassword(inputPassword, storedSalt);
+            return hashedInput == storedHash;
         }
     }
 }
