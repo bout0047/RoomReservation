@@ -26,7 +26,7 @@ namespace RoomReservationBackend.Controllers
             {
                 Name = userDto.Name,
                 Email = userDto.Email,
-                PasswordHash = userDto.Password // This is hashed in UserService
+                PasswordHash = userDto.Password
             };
 
             var result = await _userService.RegisterUserAsync(user);
@@ -36,7 +36,6 @@ namespace RoomReservationBackend.Controllers
                 return BadRequest("User already exists or registration failed.");
             }
 
-            // Generate a token after successful registration
             var token = _jwtAuthenticationManager.Authenticate(user.Email, "User");
             if (token == null)
             {

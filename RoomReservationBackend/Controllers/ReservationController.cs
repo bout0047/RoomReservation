@@ -25,7 +25,7 @@ namespace RoomReservationBackend.Controllers
             {
                 return NotFound("Reservation not found or already approved.");
             }
-            return NoContent();
+            return NoContent(); // 204 No Content on successful approval
         }
 
         [HttpPost("{id}/reject")]
@@ -36,7 +36,7 @@ namespace RoomReservationBackend.Controllers
             {
                 return NotFound("Reservation not found or already rejected.");
             }
-            return NoContent();
+            return NoContent(); // 204 No Content on successful rejection
         }
     }
 }

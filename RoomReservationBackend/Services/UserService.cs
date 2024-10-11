@@ -23,10 +23,9 @@ namespace RoomReservationBackend.Services
                 return false;
             }
 
-            // Generate salt and hash the password
             var salt = GenerateSalt();
             user.PasswordHash = HashPassword(user.PasswordHash, salt);
-            user.Salt = salt; // Assuming User entity has a Salt property
+            user.Salt = salt;
             await _userRepository.CreateUserAsync(user);
             return true;
         }
@@ -41,7 +40,6 @@ namespace RoomReservationBackend.Services
             return null;
         }
 
-        // Helper method to generate a salt
         private string GenerateSalt()
         {
             var saltBytes = new byte[16];
@@ -50,7 +48,6 @@ namespace RoomReservationBackend.Services
             return Convert.ToBase64String(saltBytes);
         }
 
-        // Hash the password with the salt
         private string HashPassword(string password, string salt)
         {
             using var sha256 = SHA256.Create();
@@ -59,7 +56,6 @@ namespace RoomReservationBackend.Services
             return Convert.ToBase64String(hashedBytes);
         }
 
-        // Verify the password by hashing it with the stored salt
         private bool VerifyPassword(string inputPassword, string storedHash, string storedSalt)
         {
             var hashedInput = HashPassword(inputPassword, storedSalt);
