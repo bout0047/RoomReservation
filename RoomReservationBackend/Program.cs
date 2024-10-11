@@ -61,6 +61,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<RoomService>();
+
+
 // Register controllers
 builder.Services.AddControllers();
 

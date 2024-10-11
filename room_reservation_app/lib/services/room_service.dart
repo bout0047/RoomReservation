@@ -6,7 +6,6 @@ class RoomService {
 
   Future<List<dynamic>> getRooms() async {
     final response = await http.get(Uri.parse(apiUrl));
-
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {

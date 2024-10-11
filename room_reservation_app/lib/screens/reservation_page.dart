@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
 import '../services/reservation_service.dart';
 
-class ReservationPage extends StatelessWidget {
+class ReservationPage extends StatefulWidget {
   final int roomId;
-  final TextEditingController startTimeController = TextEditingController();
-  final TextEditingController endTimeController = TextEditingController();
 
   ReservationPage({required this.roomId});
+
+  @override
+  _ReservationPageState createState() => _ReservationPageState();
+}
+
+class _ReservationPageState extends State<ReservationPage> {
+  TextEditingController startTimeController = TextEditingController();
+  TextEditingController endTimeController = TextEditingController();
+
+  Future<void> _selectDateTime(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      final TimeOfDay? time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      if (time != null) {
+        final DateTime dateTime = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          time.hour,
+          time.minute,
+        );
+        controller.text = dateTime.toString();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +47,25 @@ class ReservationPage extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextFormField(
+            TextField(
               controller: startTimeController,
-              decoration: InputDecoration(labelText: 'Start Time (YYYY-MM-DD HH:MM:SS)'),
+              decoration: InputDecoration(
+                labelText: 'Start Time',
+              ),
+              onTap: () => _selectDateTime(context, startTimeController),
             ),
-            TextFormField(
+            TextField(
               controller: endTimeController,
-              decoration: InputDecoration(labelText: 'End Time (YYYY-MM-DD HH:MM:SS)'),
+              decoration: InputDecoration(
+                labelText: 'End Time',
+              ),
+              onTap: () => _selectDateTime(context, endTimeController),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 var response = await ReservationService().createReservation(
-                  roomId,
+                  widget.roomId,
                   startTimeController.text,
                   endTimeController.text,
                 );

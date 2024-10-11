@@ -5,7 +5,7 @@ import 'package:room_reservation_app/screens/login_page.dart';
 import 'package:room_reservation_app/screens/register_page.dart';
 import 'package:room_reservation_app/screens/profile_page.dart';
 import 'package:room_reservation_app/screens/home_page.dart';
-
+import 'package:room_reservation_app/theme.dart'; // Import CustomTheme
 
 void main() {
   runApp(
@@ -23,7 +23,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Room Reservation App',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.blue, // Primary swatch already set to blue
+        scaffoldBackgroundColor: CustomTheme.white, // Set background color globally
+      ),
       initialRoute: '/login',
       routes: {
         '/login': (context) => LoginPage(),

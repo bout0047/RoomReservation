@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:room_reservation_app/providers/auth_provider.dart';
 import 'package:room_reservation_app/screens/widgets/sign_in.dart' as SignInWidget;
 import 'package:room_reservation_app/screens/widgets/sign_up.dart' as SignUpWidget;
 import 'package:room_reservation_app/util/bubble_indicator_painter.dart';
@@ -55,8 +54,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 Padding(
                   padding: const EdgeInsets.only(top: 75.0),
                   child: Image(
-                    height: MediaQuery.of(context).size.height > 800 ? 191.0 : 150,
-                    fit: BoxFit.fill,
+                    height: 125.0,  // Logo size set to 125
+                    fit: BoxFit.contain,
                     image: AssetImage('assets/img/login_logo.png'),
                   ),
                 ),
@@ -84,11 +83,11 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     children: <Widget>[
                       ConstrainedBox(
                         constraints: const BoxConstraints.expand(),
-                        child: SignInWidget.SignIn(), // Alias used here
+                        child: SignInWidget.SignIn(),
                       ),
                       ConstrainedBox(
                         constraints: const BoxConstraints.expand(),
-                        child: SignUpWidget.SignUp(), // Alias used here
+                        child: SignUpWidget.SignUp(),
                       ),
                     ],
                   ),
@@ -118,7 +117,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               child: TextButton(
                 onPressed: _onSignInButtonPress,
                 child: Text(
-                  'Existing',
+                  'Login',
                   style: TextStyle(color: left, fontSize: 16.0, fontFamily: 'WorkSansSemiBold'),
                 ),
               ),
@@ -127,7 +126,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               child: TextButton(
                 onPressed: _onSignUpButtonPress,
                 child: Text(
-                  'New',
+                  'Sign Up',
                   style: TextStyle(color: right, fontSize: 16.0, fontFamily: 'WorkSansSemiBold'),
                 ),
               ),
