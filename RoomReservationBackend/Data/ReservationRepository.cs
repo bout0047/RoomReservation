@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RoomReservationBackend.Models;
@@ -53,6 +54,13 @@ namespace RoomReservationBackend.Data
         {
             return await _context.Reservations
                 .Where(r => r.RoomId == roomId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Reservation>> GetReservationsByDateAsync(DateTime date)
+        {
+            return await _context.Reservations
+                .Where(r => r.StartTime.Date == date.Date)
                 .ToListAsync();
         }
     }

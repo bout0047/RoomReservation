@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:room_reservation_app/theme.dart'; // CustomTheme imported
 import '../services/reservation_service.dart';
+import 'widgets/reservation_timeline.dart';
+ // Corrected import path
 
 class ReservationPage extends StatefulWidget {
   final int roomId;
@@ -12,30 +14,43 @@ class ReservationPage extends StatefulWidget {
 }
 
 class _ReservationPageState extends State<ReservationPage> {
-  TextEditingController startTimeController = TextEditingController();
-  TextEditingController endTimeController = TextEditingController();
+  TextEditingController dateController = TextEditingController();
+  DateTime? selectedDate;
+  List<dynamic> reservations = [];
 
-  Future<void> _selectDateTime(BuildContext context, TextEditingController controller) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
+
     if (picked != null) {
-      final TimeOfDay? time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-      if (time != null) {
-        final DateTime dateTime = DateTime(
-          picked.year,
-          picked.month,
-          picked.day,
-          time.hour,
-          time.minute,
-        );
-        controller.text = dateTime.toString();
+      setState(() {
+        selectedDate = picked;
+        dateController.text = "\${picked.toLocal()}".split(' ')[0];
+      });
+      _fetchReservationsForDate();
+    }
+  }
+
+  Future<void> _fetchReservationsForDate() async {
+    if (selectedDate != null) {
+      try {
+        reservations = await ReservationService().getReservationsByDate(selectedDate!);
+        setState(() {}); // Update UI
+      } catch (e) {
+        if (e.toString().contains('401')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Session expired. Please log in again.')),
+          );
+          // Redirect to login page
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to fetch reservations')),
+          );
+        }
       }
     }
   }
@@ -72,65 +87,37 @@ class _ReservationPageState extends State<ReservationPage> {
                 ),
               ),
               SizedBox(height: 20),
-              _buildDateTimeField('Start Time', startTimeController),
-              SizedBox(height: 20),
-              _buildDateTimeField('End Time', endTimeController),
-              SizedBox(height: 40),
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CustomTheme.loginGradientStart, // Corrected parameter
-                    padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 15.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
+              TextField(
+                controller: dateController,
+                readOnly: true,
+                onTap: () => _selectDate(context),
+                decoration: InputDecoration(
+                  labelText: 'Select Date',
+                  labelStyle: TextStyle(color: CustomTheme.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: CustomTheme.white),
                   ),
-                  onPressed: () async {
-                    var response = await ReservationService().createReservation(
-                      widget.roomId,
-                      startTimeController.text,
-                      endTimeController.text,
-                    );
-                    if (response) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Reservation created successfully')),
-                      );
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to create reservation')),
-                      );
-                    }
-                  },
-                  child: Text(
-                    'Reserve',
-                    style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: CustomTheme.loginGradientEnd),
                   ),
                 ),
+                style: TextStyle(color: CustomTheme.white),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: reservations.isNotEmpty
+                    ? ReservationTimeline(reservations: reservations) // Correctly use the ReservationTimeline widget
+                    : Center(
+                        child: Text(
+                          'No reservations available for the selected date',
+                          style: TextStyle(color: CustomTheme.white),
+                        ),
+                      ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDateTimeField(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      readOnly: true,
-      onTap: () => _selectDateTime(context, controller),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: CustomTheme.white),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: CustomTheme.white),
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: CustomTheme.loginGradientEnd),
-        ),
-      ),
-      style: TextStyle(color: CustomTheme.white),
     );
   }
 }

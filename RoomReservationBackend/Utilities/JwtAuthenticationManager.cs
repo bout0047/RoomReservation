@@ -26,7 +26,7 @@ namespace RoomReservationBackend.Utilities
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Email, email), // Email claim added correctly
+                    new Claim(ClaimTypes.Email, email),
                     new Claim(ClaimTypes.Role, role)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
