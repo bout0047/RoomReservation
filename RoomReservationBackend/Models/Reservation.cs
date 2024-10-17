@@ -11,7 +11,8 @@ namespace RoomReservationBackend.Models
         public DateTime EndTime { get; set; }
         public bool IsApproved { get; set; }
 
-        public Room? Room { get; set; } // Nullable navigation property
-        public User? User { get; set; } // Nullable navigation property
+        // Foreign keys
+        public Room? Room { get; set; }
+        public User? User { get; set; }
     }
 }

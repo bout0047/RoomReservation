@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RoomReservationBackend.Data;
 
@@ -11,9 +12,11 @@ using RoomReservationBackend.Data;
 namespace RoomReservationBackend.Migrations
 {
     [DbContext(typeof(RoomReservationContext))]
-    partial class RoomReservationContextModelSnapshot : ModelSnapshot
+    [Migration("20241014143339_InitialCreat2e")]
+    partial class InitialCreat2e
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

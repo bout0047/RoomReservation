@@ -6,6 +6,7 @@ using RoomReservationBackend.Repositories;
 using RoomReservationBackend.Services;
 using RoomReservationBackend.Utilities;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,8 @@ var configuration = builder.Configuration;
 
 // Add services to the container
 builder.Services.AddDbContext<RoomReservationContext>(options =>
-    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")
+    ?? throw new ArgumentNullException("DefaultConnection string is required")));
 
 // Register application services and repositories
 builder.Services.AddScoped<UserRepository>();
@@ -22,15 +24,16 @@ builder.Services.AddScoped<ReservationRepository>();
 builder.Services.AddScoped<RoomRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ReservationService>();
+builder.Services.AddScoped<RoomService>();
+
 builder.Services.AddScoped<EmailService>(sp => new EmailService(
-    configuration["Email:SmtpServer"],
-    int.Parse(configuration["Email:SmtpPort"]),
-    configuration["Email:FromEmail"],
-    configuration["Email:FromPassword"]
+    configuration["Email:SmtpServer"] ?? throw new ArgumentNullException("SmtpServer is required"),
+    int.TryParse(configuration["Email:SmtpPort"], out int smtpPort) ? smtpPort : throw new ArgumentNullException("SmtpPort is required"),
+    configuration["Email:FromEmail"] ?? throw new ArgumentNullException("FromEmail is required"),
+    configuration["Email:FromPassword"] ?? throw new ArgumentNullException("FromPassword is required")
 ));
 builder.Services.AddSingleton<JwtAuthenticationManager>(sp =>
-    new JwtAuthenticationManager(configuration["Jwt:SecretKey"])
-);
+    new JwtAuthenticationManager(configuration["Jwt:SecretKey"] ?? throw new ArgumentNullException("Jwt:SecretKey is required")));
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -45,6 +48,11 @@ builder.Services.AddCors(options =>
 
 // Add JWT Authentication
 var jwtSecretKey = configuration["Jwt:SecretKey"];
+if (string.IsNullOrWhiteSpace(jwtSecretKey))
+{
+    throw new ArgumentNullException("Jwt:SecretKey is required");
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -61,15 +69,37 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<RoomService>();
-
-
 // Register controllers
 builder.Services.AddControllers();
 
-// Swagger for API documentation
+// Swagger for API documentation with JWT authentication
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please insert JWT token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 

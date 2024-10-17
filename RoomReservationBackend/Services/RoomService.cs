@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using RoomReservationBackend.Data;
+﻿using RoomReservationBackend.Data;
 using RoomReservationBackend.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RoomReservationBackend.Services
 {
@@ -19,40 +19,38 @@ namespace RoomReservationBackend.Services
             return await _roomRepository.GetAllRoomsAsync();
         }
 
-        public async Task<Room> GetRoomByIdAsync(int id)
+        public async Task<Room?> GetRoomByIdAsync(int id)
         {
             return await _roomRepository.GetRoomByIdAsync(id);
         }
 
-        public async Task CreateRoomAsync(RoomDto roomDto)
+        public async Task CreateRoomAsync(Room room)
         {
-            var room = new Room
-            {
-                Name = roomDto.Name,
-                Capacity = roomDto.Capacity,
-                Location = roomDto.Location,
-                Amenities = roomDto.Amenities
-            };
-
             await _roomRepository.CreateRoomAsync(room);
         }
 
-        public async Task UpdateRoomAsync(int id, RoomDto roomDto)
+        public async Task<bool> UpdateRoomAsync(Room room)
         {
-            var room = await _roomRepository.GetRoomByIdAsync(id);
-            if (room != null)
+            var existingRoom = await _roomRepository.GetRoomByIdAsync(room.RoomId);
+            if (existingRoom == null)
             {
-                room.Name = roomDto.Name;
-                room.Capacity = roomDto.Capacity;
-                room.Location = roomDto.Location;
-                room.Amenities = roomDto.Amenities;
-                await _roomRepository.UpdateRoomAsync(room);
+                return false;
             }
+
+            await _roomRepository.UpdateRoomAsync(room);
+            return true;
         }
 
-        public async Task DeleteRoomAsync(int id)
+        public async Task<bool> DeleteRoomAsync(int roomId)
         {
-            await _roomRepository.DeleteRoomAsync(id);
+            var existingRoom = await _roomRepository.GetRoomByIdAsync(roomId);
+            if (existingRoom == null)
+            {
+                return false;
+            }
+
+            await _roomRepository.DeleteRoomAsync(roomId);
+            return true;
         }
     }
 }
