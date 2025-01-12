@@ -134,5 +134,3 @@ The **Room Reservation Application** is a robust and user-friendly platform desi
    ```
 5. Open a pull request.
 
----
-
